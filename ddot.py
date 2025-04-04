@@ -13,8 +13,12 @@ init(autoreset=True)
 
 # Function to set up the SOCKS5 proxy
 def set_proxy(ip, port):
-    socks.set_default_proxy(socks.SOCKS5, ip, port)
-    socket.socket = socks.socksocket
+    try:
+        socks.set_default_proxy(socks.SOCKS5, ip, port)
+        socket.socket = socks.socksocket
+    except Exception as e:
+        print(f"{Fore.RED}Failed to set proxy {ip}:{port}. Error: {e}")
+        raise
 
 # Function to convert bytes to human-readable format
 def human_readable_size(size_in_bytes):
@@ -24,7 +28,7 @@ def human_readable_size(size_in_bytes):
         size_in_bytes /= 1024
 
 # Function to download a torrent
-def download_torrent(torrent_file, proxies=None, total_data_transferred=0):
+def download_torrent(torrent_file, proxies=None, total_data_transferred=0, retries=3):
     ses = lt.session()
     ses.listen_on(6881, 6891)
 
@@ -49,19 +53,38 @@ def download_torrent(torrent_file, proxies=None, total_data_transferred=0):
                 os.remove(file)
                 print(f"{Fore.GREEN}File deleted successfully.")
         print(f"{Fore.MAGENTA}Restarting the cycle...")
-        time.sleep(8)  # Wait for 8 seconds before restarting
+        time.sleep(1)  # Wait for 1 second before restarting
         download_torrent(torrent_file, proxies, total_data_transferred)
 
+    except RecursionError as e:
+        if retries > 0:
+            print(f"{Fore.RED}RecursionError encountered. Retrying... ({retries} retries left)")
+            time.sleep(2)
+            download_torrent(torrent_file, proxies, total_data_transferred, retries - 1)
+        else:
+            print(f"{Fore.RED}Maximum retries reached. Aborting torrent download.")
     except KeyboardInterrupt:
         print(f"\n{Fore.RED}Download interrupted, stopping torrent download.")
         ses.remove_torrent(h)
+    except Exception as e:
+        print(f"{Fore.RED}An unexpected error occurred: {e}")
 
 # Function to download a file
-def download_file(url, proxies=None, total_data_transferred=0):
+def download_file(url, proxies=None, total_data_transferred=0, retries=3):
     if proxies:
         proxy = random.choice(proxies)
         ip, port = proxy.split(':')
-        set_proxy(ip, int(port))
+        try:
+            set_proxy(ip, int(port))
+        except Exception as e:
+            print(f"{Fore.RED}Skipping proxy {ip}:{port} due to error: {e}")
+            if retries > 0:
+                print(f"{Fore.YELLOW}Retrying with a different proxy... ({retries} retries left)")
+                time.sleep(2)
+                download_file(url, proxies, total_data_transferred, retries - 1)
+            else:
+                print(f"{Fore.RED}Maximum retries reached. Aborting file download.")
+                return
 
     try:
         response = requests.get(url, stream=True)
@@ -78,11 +101,18 @@ def download_file(url, proxies=None, total_data_transferred=0):
         print(f"{Fore.MAGENTA}Deleting file: {file_name}")
         os.remove(file_name)
         print(f"{Fore.GREEN}File deleted successfully.")
-        time.sleep(8)  # Wait for 8 seconds before restarting
+        time.sleep(1)  # Wait for 1 second before restarting
         download_file(url, proxies, total_data_transferred)
 
     except requests.exceptions.RequestException as e:
-        print(f"{Fore.RED}Error occurred: {e}")
+        if retries > 0:
+            print(f"{Fore.RED}Error occurred: {e}. Retrying... ({retries} retries left)")
+            time.sleep(2)
+            download_file(url, proxies, total_data_transferred, retries - 1)
+        else:
+            print(f"{Fore.RED}Maximum retries reached. Aborting file download.")
+    except Exception as e:
+        print(f"{Fore.RED}An unexpected error occurred: {e}")
 
 # Main function to parse arguments and run the appropriate function
 def main():
@@ -142,3 +172,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
