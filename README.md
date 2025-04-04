@@ -63,8 +63,6 @@
 
 ## 🧰 Arguments
 
-Argument	Description
-
 -torrent	Path to a .torrent file to download repeatedly
 
 -file	URL to a file to download repeatedly
@@ -93,7 +91,42 @@ Argument	Description
 
   Use a proxy list (one ip:port per line) for auto-rotation.
 
+  Run script from a Ramdisk to avoid disk IO.
+
 ## ⚠️ Disclaimer
 
 This tool is provided for educational and testing purposes only.
 Do not use it to violate terms of service, abuse resources, or engage in malicious activity.
+
+## 🪙 Support
+
+
+-------------------------------------------------------------------
+
+# ꧁꧂  Buy me a coffee ☕
+
+![qrCode](https://raw.githubusercontent.com/noarche/cd-ripper/main/unrelated-ignore/CryptoQRcodes.png)
+
+**Bitcoin** address `bc1qnpjpacyl9sff6r4kfmn7c227ty9g50suhr0y9j`
+
+
+**Ethereum** address `0x94FcBab18E4c0b2FAf5050c0c11E056893134266`
+
+
+**Litecoin** address `ltc1qu7ze2hlnkh440k37nrm4nhpv2dre7fl8xu0egx`
+
+
+
+-------------------------------------------------------------------
+
+![noarche's GitHub stats](https://github-readme-stats.vercel.app/api?username=noarche&show_icons=true&theme=transparent)
+
+
+
+# 🍭 Looking for a FAST Socks4/Socks5 Proxylist checker?
+
+Written in GO for ultra high performance and reliability. Validate your proxylist is alive. 
+
+[Download here](https://github.com/noarche/proxy-checker)
+
+
